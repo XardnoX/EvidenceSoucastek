@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class Gui extends JFrame {
@@ -84,10 +85,10 @@ public class Gui extends JFrame {
     }
 
     private void checkBox(Komponenta komponenta) {
-        this.current = komponenta;
-        if (komponenta.getJeNova() == "ano") {
+
+        if (Objects.equals(komponenta.getJeNova(), "ano")) {
             newBox.setSelected(true);
-        } else if (komponenta.getJeNova() == "ne") {
+        } else if (Objects.equals(komponenta.getJeNova(), "ne")) {
             newBox.setSelected(false);
         } else {
             JOptionPane.showMessageDialog(null, "Špatně zadaná hodnota u jeNova");
@@ -96,10 +97,10 @@ public class Gui extends JFrame {
 
 
     private void radioButtons(Komponenta komponenta) {
-        this.current = komponenta;
-        if (komponenta.getStav() == "výborné") vyborneRB.setSelected(true);
-        else if (komponenta.getStav() == "dobré") dobreRB.setSelected(true);
-        else if (komponenta.getStav() == "použité") pouziteRB.setSelected(true);
+
+        if (Objects.equals(komponenta.getStav(), "výborné")) vyborneRB.setSelected(true);
+        else if (Objects.equals(komponenta.getStav(), "dobré")) dobreRB.setSelected(true);
+        else if (Objects.equals(komponenta.getStav(), "použité")) pouziteRB.setSelected(true);
         else {
             JOptionPane.showMessageDialog(null, "Špatně zadaný stav komponenty!");
         }
