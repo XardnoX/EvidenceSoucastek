@@ -2,4 +2,4 @@ XD 512 GB,3,ano,výborné,2500.0,2021-07-31
 HDD XD 512 GB,3,ano,výborné,2500.0,2021-07-31
 SSD dx 322 GB,3,ano,výborné,2500.0,2021-07-31
 HDD XD 1024 GB,5,ne,výborné,2500.0,2021-07-31
-
+výborné,32,ano,kokot,23323423,2000-11-24

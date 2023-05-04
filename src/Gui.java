@@ -58,36 +58,33 @@ public class Gui extends JFrame {
     }
 
     public List<Komponenta> scan(File file) {
-        List<Komponenta> list = new ArrayList<>();
+        List<Komponenta> listData = new ArrayList<>();
         try (Scanner scanner = new Scanner(new BufferedReader(new FileReader(file)))) {
             while (scanner.hasNextLine()) {
                 String[] data = scanner.nextLine().split(",");
                 int pocetDnu = Integer.parseInt(data[1]);
                 BigDecimal cena = new BigDecimal(data[4]);
                 LocalDate datum = LocalDate.parse(data[5]);
-                list.add(new Komponenta(data[0], pocetDnu, data[2], data[3], cena, datum));
+                listData.add(new Komponenta(data[0], pocetDnu, data[2], data[3], cena, datum));
                 numberList.add(cena);
 
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Soubor nelze přečíst!");
-        return null;
+
         }
-        return list;
+        return listData;
     }
 
     private List<Komponenta> loadData() {
         int result = jFileChooser.showOpenDialog(this);
         if (result == JFileChooser.CANCEL_OPTION) {
             JOptionPane.showMessageDialog(null, "špatný typ souboru!");
-            return null;
         }
-
         listData = scan(jFileChooser.getSelectedFile());
         Komponenta komponenta = listData.get(0);
         showData(komponenta);
-
-        return null;
+        return listData;
     }
 
     private void showData(Komponenta komponenta) {
@@ -174,7 +171,7 @@ public class Gui extends JFrame {
             int pocetDnuValue = Integer.parseInt(pocetDnu.getText());
             LocalDate datumValue = LocalDate.parse(datum.getText());
 
-            Komponenta komponenta = new Komponenta(stav, pocetDnuValue, jeNova, popisValue, cenaValue, datumValue);
+            Komponenta komponenta = new Komponenta(popisValue, pocetDnuValue, jeNova, stav, cenaValue, datumValue);
             listData.add(komponenta);
             numberList.add(cenaValue);
         } catch (Exception e) {
