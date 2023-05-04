@@ -1,16 +1,12 @@
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 public class Gui extends JFrame {
     private JPanel panel;
-    private JTextArea text;
+    private JTextArea popis;
     private JButton addButton;
     private JButton backButton;
     private JButton nextButton;
@@ -19,8 +15,12 @@ public class Gui extends JFrame {
     private JRadioButton vyborneRB;
     private JRadioButton dobreRB;
     private JRadioButton pouziteRB;
+    private JTextArea pocetDnu;
+    private JTextArea cena;
+    private JTextArea datum;
     private JFileChooser jFileChooser = new JFileChooser(".");
     public static List<Komponenta> listData = new ArrayList<>();
+    public static List<BigDecimal> numberList = new LinkedList<>();
     private Komponenta current;
 
     public static void main(String[] args) {
@@ -38,10 +38,16 @@ public class Gui extends JFrame {
         JMenuItem nacti = new JMenuItem("Načti");
         nacti.addActionListener(e -> loadData());
         JMenuItem uloz = new JMenuItem("Ulož");
+        uloz.addActionListener(e -> saved());
         JMenuItem statisky = new JMenuItem("Celková cena");
+        statisky.addActionListener(e -> stats());
         stats.add(statisky);
         jMenu.add(uloz);
         jMenu.add(nacti);
+        saveButton.addActionListener(e -> saved());
+        addButton.addActionListener(e -> refresh());
+        backButton.addActionListener(e -> backKomponenta());
+        nextButton.addActionListener(e -> nextKomponenta());
 
 
         setContentPane(panel);
@@ -57,14 +63,15 @@ public class Gui extends JFrame {
             while (scanner.hasNextLine()) {
                 String[] data = scanner.nextLine().split(",");
                 int pocetDnu = Integer.parseInt(data[1]);
-                Double cena = Double.valueOf(data[4]);
+                BigDecimal cena = new BigDecimal(data[4]);
                 LocalDate datum = LocalDate.parse(data[5]);
                 list.add(new Komponenta(data[0], pocetDnu, data[2], data[3], cena, datum));
-                text.append(data[0] + ", dodací doba " + pocetDnu + ", cena " + cena + "Kč , datum " + datum);
+                numberList.add(cena);
 
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Soubor nelze přečíst!");
+        return null;
         }
         return list;
     }
@@ -78,14 +85,17 @@ public class Gui extends JFrame {
 
         listData = scan(jFileChooser.getSelectedFile());
         Komponenta komponenta = listData.get(0);
-        checkBox(komponenta);
-        radioButtons(komponenta);
+        showData(komponenta);
 
         return null;
     }
 
-    private void checkBox(Komponenta komponenta) {
-
+    private void showData(Komponenta komponenta) {
+        this.current = komponenta;
+        datum.append("datum " + komponenta.getDatum());
+        cena.append("cena " + komponenta.getCena() + " Kč");
+        pocetDnu.append("dodací doba " + komponenta.getDoba() + " dnů");
+        popis.append(komponenta.getPopis());
         if (Objects.equals(komponenta.getJeNova(), "ano")) {
             newBox.setSelected(true);
         } else if (Objects.equals(komponenta.getJeNova(), "ne")) {
@@ -93,11 +103,6 @@ public class Gui extends JFrame {
         } else {
             JOptionPane.showMessageDialog(null, "Špatně zadaná hodnota u jeNova");
         }
-    }
-
-
-    private void radioButtons(Komponenta komponenta) {
-
         if (Objects.equals(komponenta.getStav(), "výborné")) vyborneRB.setSelected(true);
         else if (Objects.equals(komponenta.getStav(), "dobré")) dobreRB.setSelected(true);
         else if (Objects.equals(komponenta.getStav(), "použité")) pouziteRB.setSelected(true);
@@ -106,5 +111,96 @@ public class Gui extends JFrame {
         }
     }
 
+
+    private void nextKomponenta() {
+        refresh();
+        Komponenta komponenta;
+        if (listData.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "soubor je prázdný!");
+        }
+        try {
+            komponenta = listData.get(listData.indexOf(current) + 1);
+            showData(komponenta);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "není zde žádná další komponenta!");
+        }
+    }
+
+    private void backKomponenta() {
+        refresh();
+        Komponenta komponenta;
+        if (listData.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Soubor je prázdný!");
+        }
+        if (current == null) {
+            JOptionPane.showMessageDialog(this, "není zde žádná předešlá komponenta!");
+        }
+        try {
+            komponenta = listData.get(listData.indexOf(current) - 1);
+            showData(komponenta);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "není zde žádná předešlá komponenta!");
+        }
+
+    }
+
+    private void saved() {
+        save();
+        Komponenta komponenta;
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter((jFileChooser.getSelectedFile()))))) {
+            listData.forEach(current -> {
+                writer.println(current.getPopis() + "," + current.getDoba() + "," + current.getJeNova() + "," + current.getStav() + "," + current.getCena() + "," + current.getDatum());
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void save() {
+        try {
+            String stav = "";
+            if (dobreRB.isSelected()) {
+                stav = "dobré";
+            } else if (vyborneRB.isSelected()) {
+                stav = "výborné";
+            } else if (pouziteRB.isSelected()) {
+                stav = "použité";
+            }
+
+            String jeNova = newBox.isSelected() ? "ano" : "ne";
+            String popisValue = popis.getText();
+            BigDecimal cenaValue = new BigDecimal(cena.getText());
+            int pocetDnuValue = Integer.parseInt(pocetDnu.getText());
+            LocalDate datumValue = LocalDate.parse(datum.getText());
+
+            Komponenta komponenta = new Komponenta(stav, pocetDnuValue, jeNova, popisValue, cenaValue, datumValue);
+            listData.add(komponenta);
+            numberList.add(cenaValue);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "jedna z hodnot je špatně zadána!");
+        }
+    }
+
+    private void stats() {
+
+        BigDecimal sum = BigDecimal.ZERO;
+        for (BigDecimal amt : numberList) {
+            sum = sum.add(amt);
+        }
+        JOptionPane.showMessageDialog(this, sum);
+    }
+
+
+    private void refresh() {
+        dobreRB.setSelected(false);
+        vyborneRB.setSelected(false);
+        pouziteRB.setSelected(false);
+        newBox.setSelected(false);
+        popis.setText("");
+        cena.setText("");
+        datum.setText("");
+        pocetDnu.setText("");
+    }
 }
 

@@ -1,3 +1,4 @@
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class Komponenta {
@@ -5,16 +6,24 @@ public class Komponenta {
     private int doba;
     private String jeNova;
     private String stav;
-    private double cena;
+    private BigDecimal cena;
     private LocalDate datum;
 
-    public Komponenta(String popis, int doba, String jeNova, String stav, double cena, LocalDate datum) {
+    public Komponenta(String popis, int doba, String jeNova, String stav, BigDecimal cena, LocalDate datum) {
         this.popis = popis;
         this.doba = doba;
         this.jeNova = jeNova;
         this.stav = stav;
         this.cena = cena;
         this.datum = datum;
+    }
+
+    public BigDecimal getCena() {
+        return cena;
+    }
+
+    public void setCena(BigDecimal cena) {
+        this.cena = cena;
     }
 
     public String getPopis() {
@@ -49,13 +58,7 @@ public class Komponenta {
         this.stav = stav;
     }
 
-    public double getCena() {
-        return cena;
-    }
 
-    public void setCena(double cena) {
-        this.cena = cena;
-    }
 
     public LocalDate getDatum() {
         return datum;
